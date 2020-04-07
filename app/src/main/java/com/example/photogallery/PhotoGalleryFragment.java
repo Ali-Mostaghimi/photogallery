@@ -1,5 +1,6 @@
 package com.example.photogallery;
 
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,7 +20,9 @@ import java.util.List;
 public class PhotoGalleryFragment extends Fragment {
     private static final String TAG = "PhotoGalleryFragment";
     private RecyclerView mPhotoRecyclerView;
+    private PhotoAdapter mAdapter;
     private List<GalleryItem> mItems = new ArrayList<>();
+    private static int mPages = 1;
 
     public static PhotoGalleryFragment newInstance(){
         return new PhotoGalleryFragment();
@@ -29,7 +32,7 @@ public class PhotoGalleryFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        new FetchrItemsTask().execute();
+        new FetchrItemsTask().execute(mPages);
     }
 
     @Nullable
@@ -41,6 +44,16 @@ public class PhotoGalleryFragment extends Fragment {
 
         mPhotoRecyclerView = view.findViewById(R.id.fragment_photo_gallery_recycler_view);
         mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mPhotoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (!recyclerView.canScrollVertically(1)){
+                    mPages++ ;
+                    new FetchrItemsTask().execute(mPages);
+                }
+            }
+        });
 
         setupAdapter();
 
@@ -49,20 +62,21 @@ public class PhotoGalleryFragment extends Fragment {
 
     private void setupAdapter() {
         if (isAdded()){
-            mPhotoRecyclerView.setAdapter(new PhotoAdapter(mItems));
+            mAdapter = new PhotoAdapter(mItems);
+            mPhotoRecyclerView.setAdapter(mAdapter);
         }
     }
 
-    public class FetchrItemsTask extends AsyncTask<Void, Void, List<GalleryItem>>{
+    public class FetchrItemsTask extends AsyncTask<Integer, Void, List<GalleryItem>>{
         @Override
-        protected List<GalleryItem> doInBackground(Void... voids) {
-            return new FlickrFetchr().FetchItems();
+        protected List<GalleryItem> doInBackground(Integer... integers) {
+            return new FlickrFetchr().FetchItems(integers[0]);
         }
 
         @Override
         protected void onPostExecute(List<GalleryItem> galleryItems) {
-            mItems = galleryItems;
-            setupAdapter();
+            mItems.addAll(galleryItems);
+            mAdapter.notifyDataSetChanged();
         }
     }
 
@@ -104,6 +118,10 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mGalleryItems.size();
+        }
+
+        public void setGalleryItems(List<GalleryItem> items){
+            this.mGalleryItems = items;
         }
     }
 
