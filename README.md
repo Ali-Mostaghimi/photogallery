@@ -6,5 +6,6 @@ This is an android online client for [flickr.com](https://www.flickr.com/)
 * Showing something you'r interested in
 * Getting notofication for new posts
 
-This is the view: <br/>
-![ezgif.com-gif-maker](/uploads/507d7435cf990edb86db74ac2e853dd5/ezgif.com-gif-maker.gif)
+This is the view: <br/><br/>
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/52744015/102200750-7c0dbd80-3eda-11eb-9b01-383e845e642f.gif)
+
